@@ -1,3 +1,3 @@
-module demo
+module xiaomaomi
 
 go 1.14
