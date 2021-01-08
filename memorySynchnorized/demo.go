@@ -53,7 +53,7 @@ func OptMap() {
 		} else {
 			//ready channel实现了串行化操作，将同样的请求串行化为一个请求多次重试。减少无效请求的数量
 			//同样会阻塞后续的请求，因此最好放到一个goroutines中，因此正好放到deliver中。
-			//<-c.ready
+			<-c.ready
 		}
 
 		go Deliver(c, s.resp)

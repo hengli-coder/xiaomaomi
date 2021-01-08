@@ -113,17 +113,21 @@ func removeDuplicateNodes(head *ListNode) *ListNode {
 	return head
 }
 
-func reorderList(head *ListNode)  {
+func reorderList(head *ListNode) {
 	var s []*ListNode
 	cur := head
-	for cur!=nil {
+	for cur != nil {
 		s = append(s, cur)
 		cur = cur.Next
 	}
 
 	cur = head
 
-	for i:=0;i<len(s);i++ {
+	for i := 0; i < len(s); i++ {
 		s[i].Next = s[len(s)-1-i]
 	}
+}
+
+func main() {
+
 }
