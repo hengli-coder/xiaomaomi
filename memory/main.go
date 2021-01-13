@@ -21,7 +21,6 @@ func NewMemo(f Func) *Memo {
 type Func func(key string) (interface{}, error)
 
 type entry struct {
-	count int
 	r     result
 	ready chan struct{}
 }
@@ -42,23 +41,15 @@ func (m *Memo) Get(key string) (interface{}, error) {
 	if !ok {
 		res = newEntry()
 		m.cache[key] = res
-		res.count++
 		m.mu.Unlock()
 		//可以在这里添加重试
 		res.r.value, res.r.err = m.f(key)
 		close(res.ready)
 	} else {
-		res.count++
 		m.mu.Unlock()
 		<-res.ready
 	}
 
-	//如果count取值为0则需要删除相关索引
-	m.mu.Lock()
-	if res.count == 0 {
-		delete(m.cache, key)
-	}
-	m.mu.Unlock()
 	return res.r.value, res.r.err
 }
 
@@ -93,11 +84,12 @@ type request struct {
 }
 
 type MemoChan struct {
-	r chan request
+	r     chan request
+	cache map[string]*entry
 }
 
 func NewMemoChan(f Func) *MemoChan {
-	m := &MemoChan{r: make(chan request)}
+	m := &MemoChan{r: make(chan request), cache: map[string]*entry{}}
 	go m.serve(f)
 	return m
 }
@@ -111,19 +103,26 @@ func (m *MemoChan) GetFromChan(key string) (interface{}, error) {
 
 //没有删除对应的索引，没有赋值，会导致崩溃，如何删除
 func (m *MemoChan) serve(f Func) {
-	cache := make(map[string]*entry)
+
 	//需要在入队列之前就做判断
 	for r := range m.r {
-		e := cache[r.key]
+		e := m.cache[r.key]
 		if e == nil {
 			e = newEntry()
-			cache[r.key] = e
+			m.cache[r.key] = e
 			go e.call(f, r.key)
 		}
-		//计数做统计，便于后面删除索引
-		e.count++
+
 		go e.delivery(r.response)
 
+		//需要删除已经处理过的工作
+		go func(work string) {
+			select {
+			case <-e.ready:
+				//只能删除一次
+				delete(m.cache, work)
+			}
+		}(r.key)
 	}
 }
 
@@ -137,9 +136,4 @@ func (e *entry) delivery(response chan<- result) {
 	<-e.ready
 	response <- e.r
 	close(response)
-	//并发减，需要加锁，当数量减为一的时候需要，删除对应的索引
-	e.count--
-	if e.count == 0 {
-
-	}
 }

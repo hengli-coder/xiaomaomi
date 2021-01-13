@@ -25,15 +25,15 @@ type name struct {
 	age string
 }
 
-func (n *name)String() string {
-	return "{  "+n.age+" }"
+func (n *name) String() string {
+	return "{  " + n.age + " }"
 }
 
-func trace(msg string) func()func() {
+func trace(msg string) func() func() {
 	start := time.Now()
 	log.Printf("enter %s", msg)
-	return func()func() {
-		t:=time.Since(start)
+	return func() func() {
+		t := time.Since(start)
 		log.Printf("exit %s (%s)", msg, t)
 		return func() {
 			log.Printf("enter func func")
