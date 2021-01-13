@@ -27,14 +27,18 @@ func intToRoman(num int) string {
 
 var roman2int = map[rune]int{'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10, 'V': 5, 'I': 1}
 
-func romanToInt(roman string) int {
+func romanToInt(s string) int {
 	var sum, v int
-	for _, i := range roman {
-		if roman2int[i] > v {
-			sum = sum + (roman2int[i] - v)
+	roman := []rune(s)
+	for j := len(s) - 1; j >= 0; j-- {
+		if roman2int[roman[j]] >= v {
+			sum = sum + roman2int[roman[j]]
 		} else {
-			sum = sum + roman2int[i]
+			sum = sum - roman2int[roman[j]]
 		}
+
+		v = roman2int[roman[j]]
 	}
+
 	return sum
 }
