@@ -1,4 +1,4 @@
-package main
+package example
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 golang 中的锁是不可重入的
 */
 
-func main() {
+func ExampleMutex() {
 	retry(sync.Mutex{}, 10)
 }
 
