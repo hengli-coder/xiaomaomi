@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+func or()  {
+	fmt.Println(1&(1|4))
+}
+
 /*
 golang 中的锁是不可重入的
 */

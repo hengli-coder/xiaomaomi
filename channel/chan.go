@@ -25,7 +25,7 @@ func main() {
 
 
 	time.Sleep(time.Second)
-	close(c)
+	//close(c)
 	close(cb)
 	time.Sleep(time.Second*3)
 }

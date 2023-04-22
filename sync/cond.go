@@ -1,1 +1,5 @@
 package example
+
+func cond() {
+
+}
